@@ -15,7 +15,7 @@ def working_directory(var):
     return working_dir
 
 
-def clip_netcdf(var, year, shapefile_path, output_path, long_i=0, long_e=360, lat_i=0, lat_e=90):
+def clip_netcdf(var, year, shapefile_path, output_path, long_i=(-180), long_e=180, lat_i=(-50), lat_e=50):
     """clips the netCDF files to the desired shapefile"""
     # import section
     import os
@@ -44,7 +44,7 @@ def clip_netcdf(var, year, shapefile_path, output_path, long_i=0, long_e=360, la
 # clipping algorithm
 need_clipping = input("Do you need to clip some files? (Type 'Y' or 'N'): ")
 while need_clipping != 'Y' and need_clipping != 'N':
-    need_clipping = input("Please respond with 'Y' or 'N'")
+    need_clipping = input("Please respond with 'Y' or 'N' ")
 if need_clipping == 'Y':
     # setting up output location
     selected_working_directory = working_directory(variable)
