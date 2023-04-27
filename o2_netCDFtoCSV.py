@@ -9,10 +9,11 @@ import pandas as pd
 
 variable = input('Input variable(precip/tmin/tmax): ')
 no_of_grids_in_zone = [105, 82, 134, 109, 47]
-year = 2007
+year = int(input("Initial year for which netCDF file needs to be converted: "))
+end_year = int(input('Final year for which netCDF files need to be converted: '))
 lat_lon_xlsx = load_workbook(r"C:\Users\Lenovo\Desktop\Main Project\Z1. Data\Zone_latLon.xlsx").active
 # dataset
-while year < 2023:
+while int(year) < int(end_year) + 1:
     data = Dataset(r"C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\ClippedNetCDF_files\{1}clipped".format(variable, year))
     os.makedirs(r'C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\{1}zones'.format(variable, year))
     zone_table_out_location = r'C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\{1}zones'.format(variable, year)
