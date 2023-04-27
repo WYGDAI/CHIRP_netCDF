@@ -7,34 +7,42 @@ import openpyxl as op
 from openpyxl import Workbook, load_workbook
 import pandas as pd
 
+working_directory = input("Full path of working directory: ")
 variable = input('Input variable(precip/tmin/tmax): ')
-no_of_grids_in_zone = [105, 82, 134, 109, 47]
-year = int(input("Initial year for which netCDF file needs to be converted: "))
-end_year = int(input('Final year for which netCDF files need to be converted: '))
-lat_lon_xlsx = load_workbook(r"C:\Users\Lenovo\Desktop\Main Project\Z1. Data\Zone_latLon.xlsx").active
-# dataset
-while int(year) < int(end_year) + 1:
-    data = Dataset(r"C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\ClippedNetCDF_files\{1}clipped".format(variable, year))
-    os.makedirs(r'C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\{1}zones'.format(variable, year))
-    zone_table_out_location = r'C:\Users\Lenovo\Desktop\Main Project\Z1. Data\{0}\{1}zones'.format(variable, year)
-    # defining variables
-    lat = data.variables['latitude'][:]
-    lon = data.variables['longitude'][:]
-    time = data.variables['time'][:]
 
-    precip = data.variables['precip']
+no_of_grids_in_zone = [106, 83, 135, 110, 48]  # TO BE ADJUSTED
+
+start_year = int(input("Initial year for which netCDF file needs to be converted: "))
+end_year = int(input('Final year for which netCDF files need to be converted: '))
+
+lat_long_file = input("Name of file with Lat-Long data with extension (must be present in the working directory): ")
+lat_lon_xlsx = load_workbook(os.path.join(working_directory, lat_long_file)).active
+
+ncdf_files_loc = input('Input directory path where NetCDF files are located: ')
+
+current_year = start_year
+while int(current_year) < int(end_year) + 1:
+    data = Dataset(os.path.join(ncdf_files_loc, f"{current_year}clipped"))
+    os.makedirs(os.path.join(working_directory, r'{0}\{1}zones'.format(variable, current_year)))
+    zone_table_out_location = os.path.join(working_directory, r'{0}\{1}zones'.format(variable, current_year))
+    # defining variables
+    lat = data.variables['latitude'][:]  # TO BE UPDATED
+    lon = data.variables['longitude'][:]  # TO BE UPDATED
+    time = data.variables['time']  # TO BE UPDATED
+
+    precip = data.variables['precip']  # TO BE UPDATED
 
     zone = 0
-    while zone < 5:
+    while zone < len(no_of_grids_in_zone):
         # CREATION OF EMPTY PANDAS DATAFRAME
         # asserting the dates
-        starting_date = f"{str(year)}-01-01"
-        ending_date = f'{str(year)}-12-31'
+        starting_date = f"{str(current_year)}-01-01"
+        ending_date = f'{str(current_year)}-12-31'
         date_range = pd.date_range(start=starting_date, end=ending_date)
 
         # creation of empty dataframe
-        dataframe = pd.DataFrame('Rainfall', columns=['Grids'], index=date_range)
-        year_days = np.arange(0, data.variables['time'].size)  # 'np.arange' creates arrays with increment of 1
+        dataframe = pd.DataFrame(f'{variable}', columns=['Grids'], index=date_range)
+        year_days = np.arange(0, time.size)  # 'np.arange' creates arrays with increment of 1
 
         grid = 0
         while grid < no_of_grids_in_zone[zone]:
@@ -63,15 +71,17 @@ while int(year) < int(end_year) + 1:
             # put values in the pandas dataframe
             dataframe = pd.concat([dataframe, rainfall_dataframe], axis=1)
 
-            print(f"Grid{grid+1}{variable} for {year} data successfully generated")
+            print(f"Grid {grid+1} {variable} data of Zone_{zone+1} for {current_year} successfully generated")
 
             grid += 1
 
         dataframe.to_excel(os.path.join(zone_table_out_location, f'zone_{zone+1}.xlsx'))
 
-        print(f"Excel file for Zone{zone+1} successfully generated")
+        print(f"Excel file for Zone {zone+1} for the year {current_year} successfully generated")
 
         zone += 1
 
-    print(f"Zonal {variable} data for {year} generated in {zone_table_out_location}")
-    year += 1
+    print(f"Zonal {variable} data for {current_year} generated in {zone_table_out_location}")
+    current_year += 1
+
+print("All done")
